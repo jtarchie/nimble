@@ -25,6 +25,8 @@ module Nimble
     end
 
     def call(bytes, accum = [])
+      original_accum = accum.dup
+      
       leftovers = @machines.reduce(bytes) do |b, machine|
         status, accum, leftovers = machine.call(b, accum)
 
@@ -32,7 +34,7 @@ module Nimble
         when :ok
           leftovers
         when :error
-          return :error, accum, leftovers
+          return :error, original_accum, bytes
         end
       end
 
