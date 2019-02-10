@@ -13,4 +13,12 @@ RSpec.describe 'string combinator' do
     expect(only_string.call('TOC')).to eq [:ok, ['TO'], 'C']
     expect(only_string.call('AO')).to eq [:error, [], 'AO']
   end
+
+  it 'properly counts newlines' do
+    only_string_with_newline = string("T\nO")
+
+    expect(only_string_with_newline.call("T\nO")).to eq [:ok, ["T\nO"], '']
+    expect(only_string_with_newline.call("T\nOC")).to eq [:ok, ["T\nO"], 'C']
+    expect(only_string_with_newline.call("A\nO")).to eq [:error, [], "A\nO"]
+  end
 end
