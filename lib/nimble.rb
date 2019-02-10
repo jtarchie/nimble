@@ -9,6 +9,10 @@ module Nimble
     ::Nimble::String.new(s)
   end
 
+  def integer(size)
+    ::Nimble::Integer.new(size)
+  end
+
   class Machine
     def |(other)
       Concat.new([self, other])
@@ -33,6 +37,21 @@ module Nimble
       end
 
       [:ok, accum, leftovers]
+    end
+  end
+
+  class Integer < Machine
+    def initialize(size)
+      @size = size
+    end
+
+    def call(bytes, accum = [])
+      return :error, accum, bytes unless bytes.length >= @size
+
+      integer = bytes[0...@size].to_i
+      return :ok, accum.push(integer), bytes[@size..-1] if integer.to_s == bytes[0...@size]
+
+      [:error, accum, bytes]
     end
   end
 
