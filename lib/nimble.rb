@@ -5,6 +5,10 @@ module Nimble
     AsciiChar.new(ranges)
   end
 
+  def string(s)
+    ::Nimble::String.new(s)
+  end
+
   class Machine
     def |(other)
       Concat.new([self, other])
@@ -32,6 +36,21 @@ module Nimble
     end
   end
 
+  class String < Machine
+    def initialize(string)
+      @string = string
+    end
+
+    def call(bytes, accum = [])
+      length = @string.length
+      if bytes[0...length] == @string
+        return :ok, accum.push(@string), bytes[length..-1]
+      end
+
+      [:error, accum, bytes]
+    end
+  end
+
   class AsciiChar < Machine
     def initialize(ranges)
       @ranges = ranges
@@ -51,7 +70,7 @@ module Nimble
           return :ok, accum, bytes[1..-1] if range.empty?
         when Hash
           next if range.fetch(:not).include?(char)
-        when String
+        when ::String
           return :ok, accum, bytes[1..-1] if range == char
         else
           raise "Unsupported range: #{range.inspect}"
