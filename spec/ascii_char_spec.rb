@@ -40,4 +40,12 @@ RSpec.describe 'ascii_char combinator without newlines' do
     expect(multi_ascii_with_multi_not.call('cc')).to eq [:error, [], 'cc']
     expect(multi_ascii_with_multi_not.call('de')).to eq [:error, [], 'de']
   end
+
+  it 'returns ok/error even with newlines' do
+    ascii_newline = ascii_char(['0'..'9', "\n"]) | ascii_char(['a'..'z', "\n"])
+
+    expect(ascii_newline.call("1a\n")).to eq [:ok, %w[1 a], "\n"]
+    expect(ascii_newline.call("1\na")).to eq [:ok, %W[1 \n], 'a']
+    expect(ascii_newline.call("\nao")).to eq [:ok, %W[\n a], 'o']
+  end
 end
