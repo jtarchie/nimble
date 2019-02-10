@@ -28,7 +28,7 @@ module Nimble
         end
       end
 
-      return :ok, accum, leftovers
+      [:ok, accum, leftovers]
     end
   end
 
@@ -55,7 +55,7 @@ module Nimble
       end
 
       accum.pop
-      return :error, accum, bytes
+      [:error, accum, bytes]
     end
   end
 end
