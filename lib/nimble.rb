@@ -15,9 +15,23 @@ module Nimble
     ::Nimble::Integer.new(size)
   end
 
+  def tag(name)
+    Tag.new(name)
+  end
+
   class Machine
     def |(other)
       Concat.new([self, other])
+    end
+  end
+
+  class Tag < Machine
+    def initialize(name)
+      @name = name
+    end
+
+    def call(bytes, accum = [])
+      [:ok, [@name, accum], bytes]
     end
   end
 
