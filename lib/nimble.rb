@@ -9,7 +9,9 @@ module Nimble
     ::Nimble::String.new(s)
   end
 
-  def integer(size)
+  def integer(size:)
+    size = size..size if size.is_a?(::Integer)
+
     ::Nimble::Integer.new(size)
   end
 
@@ -26,7 +28,7 @@ module Nimble
 
     def call(bytes, accum = [])
       original_accum = accum.dup
-      
+
       leftovers = @machines.reduce(bytes) do |b, machine|
         status, accum, leftovers = machine.call(b, accum)
 
@@ -48,10 +50,18 @@ module Nimble
     end
 
     def call(bytes, accum = [])
-      return :error, accum, bytes unless bytes.length >= @size
+      pos = 0
+      number = ''
+      regex = if @size.end.nil?
+                /^([0-9]{#{@size.min},})/
+              elsif @size.begin == @size.end
+                /^([0-9]{#{@size.min}})/
+              else
+                /^([0-9]{#{@size.min},#{@size.max}})/
+      end
 
-      integer = bytes[0...@size].to_i
-      return :ok, accum.push(integer), bytes[@size..-1] if integer.to_s == bytes[0...@size]
+      matches = regex.match(bytes)
+      return :ok, accum.push(matches[1].to_i), bytes[matches[1].length..-1] if matches
 
       [:error, accum, bytes]
     end
