@@ -16,6 +16,7 @@ RSpec.describe 'ascii_char combinator without newlines' do
 
   it 'returns on ok/error on multiple ranges' do
     multi_ascii = ascii_char(['0'..'9', 'z'..'a'])
+
     expect(multi_ascii.call('1a')).to eq [:ok, ['1'], 'a']
     expect(multi_ascii.call('a1')).to eq [:ok, ['a'], '1']
     expect(multi_ascii.call('++')).to eq [:error, [], '++']
@@ -23,9 +24,20 @@ RSpec.describe 'ascii_char combinator without newlines' do
 
   it 'return ok/error on multiple ranges with not' do
     multi_ascii_with_not = ascii_char(['0'..'9', 'z'..'a', { not: 'c' }])
+
     expect(multi_ascii_with_not.call('1a')).to  eq [:ok, ['1'], 'a']
     expect(multi_ascii_with_not.call('a1')).to  eq [:ok, ['a'], '1']
     expect(multi_ascii_with_not.call('++')).to  eq [:error, [], '++']
     expect(multi_ascii_with_not.call('cc')).to  eq [:error, [], 'cc']
+  end
+
+  it 'returns ok/error on multiple ranges with multiple not' do
+    multi_ascii_with_multi_not = ascii_char(['0'..'9', 'z'..'a', { not: 'c' }, { not: 'd'..'e' }])
+
+    expect(multi_ascii_with_multi_not.call('1a')).to eq [:ok, ['1'], 'a']
+    expect(multi_ascii_with_multi_not.call('a1')).to eq [:ok, ['a'], '1']
+    expect(multi_ascii_with_multi_not.call('++')).to eq [:error, [], '++']
+    expect(multi_ascii_with_multi_not.call('cc')).to eq [:error, [], 'cc']
+    expect(multi_ascii_with_multi_not.call('de')).to eq [:error, [], 'de']
   end
 end

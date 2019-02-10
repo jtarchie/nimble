@@ -50,7 +50,7 @@ module Nimble
         when Array
           return :ok, accum, bytes[1..-1] if range.empty?
         when Hash
-          next if range.fetch(:not) != char
+          next if range.fetch(:not).include?(char)
         else
           raise "Unsupported range: #{range.inspect}"
         end
