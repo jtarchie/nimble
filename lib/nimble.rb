@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Nimble
-  def ascii_char(ranges)
-    AsciiChar.new(ranges)
+  def utf8_char(ranges)
+    Char.new(ranges)
   end
 
   def string(s)
@@ -96,7 +96,7 @@ module Nimble
     end
   end
 
-  class AsciiChar < Machine
+  class Char < Machine
     def initialize(ranges)
       @ranges = ranges
     end
