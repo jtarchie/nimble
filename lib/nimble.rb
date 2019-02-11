@@ -2,7 +2,7 @@
 
 module Nimble
   def utf8_char(ranges)
-    Char.new(ranges)
+    UTF8Char.new(ranges)
   end
 
   def string(s)
@@ -19,9 +19,71 @@ module Nimble
     Tag.new(name)
   end
 
+  def concat(a, b)
+    Concat.new([a, b])
+  end
+
+  def utf8_string(ranges, size:)
+    duplicate(utf8_char(ranges), size) | reduce(:join, [''])
+  end
+
+  def reduce(method, args)
+    Reduce.new(method, args)
+  end
+
+  def replace(machine, value)
+    Replace.new(machine, value)
+  end
+
+  def empty
+    Empty.new
+  end
+
+  def duplicate(machine, size)
+    return empty if size == 0
+
+    1.upto(size - 1).reduce(machine) do |m, _|
+      m | machine
+    end
+  end
+
   class Machine
     def |(other)
       Concat.new([self, other])
+    end
+  end
+
+  class Empty < Machine
+    def call(bytes, accum = [])
+      [:ok, accum, bytes]
+    end
+  end
+
+  class Replace < Machine
+    def initialize(machine, value)
+      @machine = machine
+      @value = value
+    end
+
+    def call(bytes, accum = [])
+      status, accum, bytes = @machine.call(bytes, accum)
+      if status == :ok
+        [:ok, [@value], bytes]
+      else
+        [:error, accum, bytes]
+      end
+    end
+  end
+
+  class Reduce < Machine
+    def initialize(method, args)
+      @method = method
+      @args = args
+    end
+
+    def call(bytes, accum = [])
+      accum = [accum.__send__(@method, *@args)]
+      [:ok, accum, bytes]
     end
   end
 
@@ -96,7 +158,7 @@ module Nimble
     end
   end
 
-  class Char < Machine
+  class UTF8Char < Machine
     def initialize(ranges)
       @ranges = ranges
     end
