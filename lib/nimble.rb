@@ -39,6 +39,10 @@ module Nimble
     Empty.new
   end
 
+  def ignore
+    Ignore.new
+  end
+
   def duplicate(machine, size)
     return empty if size == 0
 
@@ -50,6 +54,12 @@ module Nimble
   class Machine
     def |(other)
       Concat.new([self, other])
+    end
+  end
+
+  class Ignore < Machine
+    def call(bytes, accum = [])
+      [:ok, [], bytes]
     end
   end
 
