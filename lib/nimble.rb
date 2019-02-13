@@ -42,7 +42,7 @@ module Nimble
   def duplicate(machine, size)
     return empty if size == 0
 
-    1.upto(size - 1).reduce(machine) do |m, _|
+    2.upto(size).reduce(machine) do |m, _|
       m | machine
     end
   end
