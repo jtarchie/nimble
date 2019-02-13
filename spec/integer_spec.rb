@@ -16,7 +16,7 @@ RSpec.describe 'integer' do
     end
 
     it 'returns ok/error with previous document' do
-      prefixed_integer = string('T') | integer(size: 2)
+      prefixed_integer = string('T') + integer(size: 2)
 
       expect(prefixed_integer.call('T12')).to eq [:ok, ['T', 12], '']
       expect(prefixed_integer.call('T123')).to eq [:ok, ['T', 12], '3']

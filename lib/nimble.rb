@@ -24,7 +24,7 @@ module Nimble
   end
 
   def utf8_string(ranges, size:)
-    duplicate(utf8_char(ranges), size) | reduce(:join, [''])
+    duplicate(utf8_char(ranges), size) + reduce(:join, [''])
   end
 
   def reduce(method, args)
@@ -47,18 +47,18 @@ module Nimble
     return empty if size == 0
 
     2.upto(size).reduce(machine) do |m, _|
-      m | machine
+      m + machine
     end
   end
 
   class Machine
-    def |(other)
+    def +(other)
       Concat.new([self, other])
     end
   end
 
   class Ignore < Machine
-    def call(bytes, accum = [])
+    def call(bytes, _accum = [])
       [:ok, [], bytes]
     end
   end

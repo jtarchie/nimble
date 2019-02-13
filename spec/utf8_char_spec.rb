@@ -7,7 +7,7 @@ RSpec.describe 'utf8_char combinator without newlines' do
   include Nimble
 
   it 'returns ok/error on composition' do
-    only_ascii = utf8_char(['0'..'9']) | utf8_char([])
+    only_ascii = utf8_char(['0'..'9']) + utf8_char([])
 
     expect(only_ascii.call('1a')).to eq [:ok, %w[1 a], '']
     expect(only_ascii.call('11')).to eq [:ok, %w[1 1], '']
@@ -42,7 +42,7 @@ RSpec.describe 'utf8_char combinator without newlines' do
   end
 
   it 'returns ok/error even with newlines' do
-    ascii_newline = utf8_char(['0'..'9', "\n"]) | utf8_char(['a'..'z', "\n"])
+    ascii_newline = utf8_char(['0'..'9', "\n"]) + utf8_char(['a'..'z', "\n"])
 
     expect(ascii_newline.call("1a\n")).to eq [:ok, %w[1 a], "\n"]
     expect(ascii_newline.call("1\na")).to eq [:ok, %W[1 \n], 'a']
@@ -51,7 +51,7 @@ RSpec.describe 'utf8_char combinator without newlines' do
 
   context 'when using utf8 utf8_characters' do
     it 'returns ok/error on composition' do
-      only_utf8 = utf8_char(['0'..'9']) | utf8_char([])
+      only_utf8 = utf8_char(['0'..'9']) + utf8_char([])
 
       expect(only_utf8.call('1a')).to eq [:ok, %w[1 a], '']
       expect(only_utf8.call('11')).to eq [:ok, %w[1 1], '']
@@ -60,7 +60,7 @@ RSpec.describe 'utf8_char combinator without newlines' do
     end
 
     it 'returns ok/error even with newlines' do
-      utf8_newline = utf8_char([]) | utf8_char(['a'..'z', "\n"])
+      utf8_newline = utf8_char([]) + utf8_char(['a'..'z', "\n"])
 
       expect(utf8_newline.call("1a\n")).to eq [:ok, %w[1 a], "\n"]
       expect(utf8_newline.call("1\na")).to eq [:ok, %W[1 \n], 'a']
