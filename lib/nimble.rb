@@ -24,11 +24,11 @@ module Nimble
   end
 
   def utf8_string(ranges, size:)
-    duplicate(utf8_char(ranges), size) + reduce(:join, [''])
+    duplicate(utf8_char(ranges), size) + reduce(&:join)
   end
 
-  def reduce(method, args)
-    Reduce.new(method, args)
+  def reduce(&block)
+    Reduce.new(block)
   end
 
   def replace(machine, value)
@@ -43,6 +43,18 @@ module Nimble
     Ignore.new
   end
 
+  def map(&block)
+    Map.new(block)
+  end
+
+  def label(machine, message)
+    Label.new(machine, message)
+  end
+
+  def choice(machines)
+    Choice.new(machines)
+  end
+
   def duplicate(machine, size)
     return empty if size == 0
 
@@ -51,9 +63,68 @@ module Nimble
     end
   end
 
+  def repeat(machine)
+    Repeat.new(machine)
+  end
+
   class Machine
     def +(other)
       Concat.new([self, other])
+    end
+  end
+
+  class Repeat < Machine
+    def initialize(machine)
+      @machine = machine
+    end
+
+    def call(bytes, accum = [])
+      loop do
+        status, new_accum, new_bytes = @machine.call(bytes, accum[0..])
+        return [:ok, accum, bytes] if status == :error
+
+        accum = new_accum
+        bytes = new_bytes
+      end
+    end
+  end
+
+  class Choice < Machine
+    def initialize(machines)
+      @machines = machines
+    end
+
+    def call(bytes, accum = [])
+      original_accum = accum.dup
+
+      @machines.each do |machine|
+        status, accum, bytes = machine.call(bytes, original_accum)
+        case status
+        when :ok
+          return :ok, accum, bytes
+        when :error
+          next
+        end
+      end
+
+      [:error, [], bytes]
+    end
+  end
+
+  class Label < Machine
+    def initialize(machine, message)
+      @machine = machine
+      @message = message
+    end
+
+    def call(bytes, accum = [])
+      status, accum, bytes = @machine.call(bytes, accum)
+      case status
+      when :ok
+        [:ok, accum, bytes]
+      when :error
+        [:error, "expected #{@message}", bytes]
+      end
     end
   end
 
@@ -85,14 +156,24 @@ module Nimble
     end
   end
 
-  class Reduce < Machine
-    def initialize(method, args)
-      @method = method
-      @args = args
+  class Map < Machine
+    def initialize(block)
+      @block = block
     end
 
     def call(bytes, accum = [])
-      accum = [accum.__send__(@method, *@args)]
+      accum = accum.map(&@block)
+      [:ok, accum, bytes]
+    end
+  end
+
+  class Reduce < Machine
+    def initialize(block)
+      @block = block
+    end
+
+    def call(bytes, accum = [])
+      accum = [@block.call(accum)]
       [:ok, accum, bytes]
     end
   end
