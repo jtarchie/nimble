@@ -56,11 +56,18 @@ RSpec.describe 'choice combinator' do
     expect(choice_repeat_and_inner_map.call('aAzZ')).to eq [:ok, %w[a A z Z], '']
   end
 
-  # it 'returns ok/error with repeat and maps' do
-  #   expect(choice_repeat_and_maps.call('az')).to eq [:ok, %w[a z], '']
-  #   expect(choice_repeat_and_maps.call('AZ')).to eq [:ok, %w[A Z], '']
-  #   expect(choice_repeat_and_maps.call('aAzZ')).to eq [:ok, %w[a A z Z], '']
-  # end
+  it 'returns ok/error with repeat and maps' do
+    choice_repeat_and_maps = repeat(
+      choice([
+               utf8_char(['a'..'z']) + map(&:ord),
+               utf8_char(['A'..'Z']) + map(&:ord)
+             ])
+    ) + map(&:chr)
+
+    expect(choice_repeat_and_maps.call('az')).to eq [:ok, %w[a z], '']
+    expect(choice_repeat_and_maps.call('AZ')).to eq [:ok, %w[A Z], '']
+    expect(choice_repeat_and_maps.call('aAzZ')).to eq [:ok, %w[a A z Z], '']
+  end
 
   it 'returns ok/error on empty' do
     choice_with_empty =

@@ -80,10 +80,10 @@ module Nimble
 
     def call(bytes, accum = [])
       loop do
-        status, new_accum, new_bytes = @machine.call(bytes, accum[0..])
+        status, new_accum, new_bytes = @machine.call(bytes)
         return [:ok, accum, bytes] if status == :error
 
-        accum = new_accum
+        accum += new_accum
         bytes = new_bytes
       end
     end
