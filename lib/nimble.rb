@@ -95,13 +95,11 @@ module Nimble
     end
 
     def call(bytes, accum = [])
-      original_accum = accum.dup
-
       @machines.each do |machine|
-        status, accum, bytes = machine.call(bytes, original_accum)
+        status, new_accum, bytes = machine.call(bytes, accum[0..])
         case status
         when :ok
-          return :ok, accum, bytes
+          return :ok, new_accum, bytes
         when :error
           next
         end
